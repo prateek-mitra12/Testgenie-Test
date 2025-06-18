@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  testgenie:
+    build: .
+    container_name: testgenie-app
+    ports:
+      - "8501:8501"
+    environment:
+      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_ADDRESS=0.0.0.0
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs:/app/logs
+      # Mount config files if you need to modify them without rebuilding
+      - ./config.yml:/app/config.yml:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add Redis for session management if needed
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: testgenie-redis
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+
+networks:
+  default:
+    name: testgenie-network 
